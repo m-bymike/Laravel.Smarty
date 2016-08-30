@@ -17,7 +17,7 @@
  */
 namespace Ytake\LaravelSmarty\Console;
 
-use Smarty;
+use Ytake\LaravelSmarty\SmartyFactory;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -29,18 +29,6 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class CacheClearCommand extends Command
 {
-    /** @var Smarty */
-    protected $smarty;
-
-    /**
-     * @param Smarty $smarty
-     */
-    public function __construct(Smarty $smarty)
-    {
-        parent::__construct();
-        $this->smarty = $smarty;
-    }
-
     /**
      * The console command name.
      *
@@ -58,25 +46,26 @@ class CacheClearCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
+     * @param \Ytake\LaravelSmarty\SmartyFactory $smartyFactory
+     * @return int
      */
-    public function fire()
+    public function fire(SmartyFactory $smartyFactory)
     {
         // clear all cache
         if (is_null($this->option('file'))) {
-            $this->smarty->clearAllCache($this->option('time'));
+            $smartyFactory->getSmarty()->clearAllCache($this->option('time'));
             $this->info('Smarty cache cleared!');
-            return;
+            return 0;
         }
         // file specified
-        if (!$this->smarty->clearCache(
+        if (!$smartyFactory->getSmarty()->clearCache(
             $this->option('file'), $this->option('cache_id'), null, $this->option('time'))
         ) {
             $this->error('specified file not be found');
-            return;
+            return 1;
         }
         $this->info('specified file was cache cleared!');
-        return;
+        return 0;
     }
 
     /**
